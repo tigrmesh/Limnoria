@@ -83,6 +83,41 @@ class QuoteGrabsTestCase(ChannelPluginTestCase):
         self.assertNotError('ungrab 2')
         self.assertError('ungrab')
 
+    def testUngrabBulk(self):
+        testPrefix = 'foo!bar@baz'
+        # nothing yet
+        self.assertError('ungrab_bulk')
+        self.assertError('ungrab_bulk 2')
+
+        self.irc.feedMsg(ircmsgs.privmsg(self.channel, 'quote 1',
+                                         prefix=testPrefix))
+
+        # still not grabbed
+        self.assertError('ungrab_bulk')
+        self.assertError('ungrab_bulk 3')
+
+        # grab two quotes and attempt to ungrab them
+        self.assertNotError('grab foo')
+        self.irc.feedMsg(ircmsgs.privmsg(self.channel, 'quote 2',
+                                         prefix=testPrefix))
+        self.assertNotError('grab foo')
+
+        # attempt to ungrab two random nonexistent quotes
+        self.assertError('ungrab_bulk 8883 1234')
+        # attempt to ungrab the previously grabbed quotes
+        self.assertNotError('ungrab_bulk 1 2')
+        self.assertError('ungrab_bulk 1 2')
+
+        # grab two quotes and ungrab them backwards
+        self.irc.feedMsg(ircmsgs.privmsg(self.channel, 'quote 1',
+                                         prefix=testPrefix))
+        self.assertNotError('grab foo')
+        self.irc.feedMsg(ircmsgs.privmsg(self.channel, 'quote w',
+                                         prefix=testPrefix))
+        self.assertNotError('grab foo')
+        self.assertNotError('ungrab_bulk 2 1')
+        self.assertError('ungrab_bulk 2 1')
+
     def testList(self):
         testPrefix = 'foo!bar@baz'
         self.irc.feedMsg(ircmsgs.privmsg(self.channel, 'testList',

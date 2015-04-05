@@ -311,6 +311,27 @@ class QuoteGrabs(callbacks.Plugin):
     ungrab = wrap(ungrab, ['channeldb', optional('id')])
 
     @internationalizeDocstring
+    def ungrabbulk(self, irc, msg, args, channel, grabs):
+        """[<channel>] <numbers>
+
+        [CUSTOM] Removes the grabs <numbers>.
+        """
+        grab_list = string.split(grabs, ' ')
+
+        if len(grab_list) < 1:
+            irc.error(_('Nothing to ungrab.'))
+
+        for grab in grab_list:
+            try:
+                self.db.remove(channel, grab)
+            except:
+                irc.error(_('Unable to ungrab {}.').format(grab))
+
+        irc.replySuccess()
+    ungrabbulk = wrap(ungrabbulk, ['channeldb', 'text'])
+
+
+    @internationalizeDocstring
     def quote(self, irc, msg, args, channel, nick):
         """[<channel>] <nick>
 

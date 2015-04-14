@@ -695,6 +695,25 @@ class MoobotFactoids(callbacks.Plugin):
     remove = wrap(remove, ['channeldb', 'user', 'text'])
 
     @internationalizeDocstring
+    def removebulk(self, irc, msg, args, channel, _, keys):
+        """[<channel>] <factoid keys>
+
+        [CUSTOM] Deletes the factoids with the given keys.  <channel> is only
+        necessary if the message isn't sent in the channel itself.
+        """
+
+        key_list = keys.split(' ')
+
+        for key in key_list:
+            try:
+                self.db.removeFactoid(channel, key)
+            except:
+                irc.error(_('Unable to remove {}.').format(key))
+
+        irc.replySuccess
+    removebulk = wrap(removebulk, ['channeldb', 'user', 'key'])
+
+    @internationalizeDocstring
     def random(self, irc, msg, args, channel):
         """[<channel>]
 
